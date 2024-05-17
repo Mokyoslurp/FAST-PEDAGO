@@ -16,6 +16,7 @@ import openmdao.api as om
 from typing import List
 
 import ipywidgets as widgets
+import ipyvuetify as v
 
 from .impact_variable_inputs_tab import (
     ImpactVariableInputLaunchTab,

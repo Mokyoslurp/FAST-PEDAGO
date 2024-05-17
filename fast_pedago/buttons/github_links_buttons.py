@@ -3,6 +3,7 @@
 # Copyright (C) 2022 ISAE-SUPAERO
 
 import ipywidgets as widgets
+import ipyvuetify as v
 
 import webbrowser
 
@@ -10,49 +11,55 @@ GITHUB_FAST_CORE = "https://github.com/fast-aircraft-design/FAST-OAD"
 GITHUB_FAST_CS25 = "https://github.com/fast-aircraft-design/FAST-OAD_CS25"
 GITHUB_FAST_CS23 = "https://github.com/supaero-aircraft-design/FAST-GA"
 
+# Base functions to get a standard button opening a git page
+
+def open_github(widget, event, data):
+    if widget.tag == "core":
+        webbrowser.open_new_tab(GITHUB_FAST_CORE)
+    elif widget.tag == "cs25":
+        webbrowser.open_new_tab(GITHUB_FAST_CS25)
+    elif widget.tag == "cs23":
+        webbrowser.open_new_tab(GITHUB_FAST_CS23)
+
+def get_base_git_button():
+    git_button = v.Btn(
+        tag = "",
+        children = [
+            v.Icon(
+                class_ = "me-2",
+                children = ["fa-github"])
+        ]
+    )
+
+    git_button.on_event("click", open_github)
+
+    return git_button
+
+
+# Personnalized git buttons
 
 def get_fast_oad_core_git_button():
 
-    fast_core_git_button = widgets.Button(description="FAST-OAD_core")
-    fast_core_git_button.icon = "fa-github"
-    fast_core_git_button.layout.width = "auto"
-    fast_core_git_button.layout.height = "auto"
-
-    def open_github_fast_core(event):
-        webbrowser.open_new_tab(GITHUB_FAST_CORE)
-
-    fast_core_git_button.on_click(open_github_fast_core)
+    fast_core_git_button = get_base_git_button()
+    fast_core_git_button.children.append("FAST-OAD_core")
+    fast_core_git_button.tag = "core"
 
     return fast_core_git_button
 
 
 def get_fast_oad_cs25_git_button():
 
-    # TODO: Refactor those functions ?
-    fast_cs25_git_button = widgets.Button(description="FAST-OAD_CS25")
-    fast_cs25_git_button.icon = "fa-github"
-    fast_cs25_git_button.layout.width = "auto"
-    fast_cs25_git_button.layout.height = "auto"
-
-    def open_github_fast_cs25(event):
-        webbrowser.open_new_tab(GITHUB_FAST_CS25)
-
-    fast_cs25_git_button.on_click(open_github_fast_cs25)
+    fast_cs25_git_button = get_base_git_button()
+    fast_cs25_git_button.children.append("FAST-OAD_cs25")
+    fast_cs25_git_button.tag = "cs25"
 
     return fast_cs25_git_button
 
 
 def get_fast_oad_cs23_git_button():
 
-    fast_cs23_git_button = widgets.Button(description="FAST-OAD_CS23")
-    fast_cs23_git_button.icon = "fa-github"
-    fast_cs23_git_button.layout.width = "auto"
-    fast_cs23_git_button.layout.height = "auto"
-
-    # Button to redirect to github repositories
-    def open_github_fast_cs23(event):
-        webbrowser.open_new_tab(GITHUB_FAST_CS23)
-
-    fast_cs23_git_button.on_click(open_github_fast_cs23)
+    fast_cs23_git_button = get_base_git_button()
+    fast_cs23_git_button.children.append("FAST-OAD_cs23")
+    fast_cs23_git_button.tag = "cs23"
 
     return fast_cs23_git_button

@@ -8,7 +8,7 @@ import ipyvuetify as v
 from IPython.display import display
 
 # Create a withe box behind the info button
-display(widgets.HTML("""<style>.white-vbox {background-color: white;}</style>"""))
+# display(widgets.HTML("""<style>.white-vbox {background-color: white;}</style>"""))
 
 
 def get_clear_all_button():

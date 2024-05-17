@@ -20,12 +20,8 @@ def _image_from_path(file_path: str, height: str, width: str) -> widgets.Image:
     image = file.read()
     image_widget = widgets.Image(value=image, format=file_extension)
     image_widget.layout = widgets.Layout(
-        border="0px solid black",
-        margin="0 0 0 0px",
-        padding="0px",
-        align_items="center",
         height=height,
-        width=width,
+        # width=width,
     )
 
     return image_widget

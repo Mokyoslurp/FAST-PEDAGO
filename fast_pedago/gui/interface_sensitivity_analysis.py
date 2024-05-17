@@ -26,30 +26,30 @@ from fast_pedago.buttons import (
 from fast_pedago.tabs import ParentTab
 from fast_pedago.utils.functions import _image_from_path  # noqa
 
-BOTTOM_BOX_LAYOUT = widgets.Layout(
-    border="0px solid black",
-    margin="0 0 0 0px",
-    padding="0px",
-    align_items="center",
-    width="100%",
-    height="10%",
-)
+from fast_pedago.tabs.sensitivity_analysis_parent_tab import TABS_NAME
+
+# BOTTOM_BOX_LAYOUT = widgets.Layout(
+#     border="0px solid black",
+#     margin="0 0 0 0px",
+#     padding="0px",
+#     align_items="center",
+#     width="100%",
+#     height="10%",
+# )
 
 
-class FASTOADInterface(widgets.VBox):
+class FASTOADInterface(v.App):
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
 
-        self.layout = widgets.Layout(
-            border="6px solid black",
-            margin="100 20 50 100px",
-            padding="10px",
-            align_items="center",
-            width="1302px",
-            height="900px",
-            justify_content="center",
-        )
+
+        # self.layout = widgets.Layout(
+        #     border="6px solid black",
+        #     margin="100 20 50 100px",
+        #     padding="10px",
+        #     height="100vh",
+        # )
 
         # With Voila it seems impossible to clear and re-display contrarily to Jupyter Notebook.
         # Instead, we'll use the workaround from
@@ -62,43 +62,49 @@ class FASTOADInterface(widgets.VBox):
         )
 
         # Add a filler box to force the buttons on the bottom and so that the picture appear clearly
-        self.main_menu_filler_box = widgets.Box(
-            layout=widgets.Layout(
-                border="0px solid black",
-                margin="0 0 0 0px",
-                padding="0px",
-                align_items="center",
-                width="100",
-                height="10%",
-            ),
-        )
+        # self.main_menu_filler_box = widgets.Box(
+        #     layout=widgets.Layout(
+        #         border="0px solid black",
+        #         margin="0 0 0 0px",
+        #         padding="0px",
+        #         align_items="center",
+        #         width="100",
+        #         height="10%",
+        #     ),
+        # )
 
         fast_oad_logo_main_menu_file_path = pth.join(
             pth.dirname(__file__), "resources", "logo_fast_oad_main_menu.jpg"
         )
-        self.fast_oad_main_menu_logo_widget = _image_from_path(
-            fast_oad_logo_main_menu_file_path, height="50%", width="100"
+        self.fast_oad_main_menu_logo_widget = v.Row(
+            align = "top",
+            justify = "center",
+            children = [_image_from_path(fast_oad_logo_main_menu_file_path, height="40vh", width="10")]
         )
 
-        self.reference_file_text_box = widgets.VBox()
+        self.reference_file_text_box = v.Row(
+            align = "top",
+            justify = "center",
+        )
         self.reference_file_text_box.children = [
             widgets.HTML(value=f"<u><b><font size=3>Select a reference file</b></u>")
         ]
-        self.reference_file_text_box.layout = widgets.Layout(
-            align_items="center", width="100%", height="4%"
-        )
 
         # This reference file should always be there and is always taken as reference
-        self.reference_file_selector_widget = widgets.Dropdown(
-            options=self.reference_file_list,
-            value="reference_aircraft_source_data_file",
-            disabled=False,
-            style={"description_width": "initial"},
+        self.reference_file_selector_widget = v.Col(
+            cols = 12,
+            md = 10,
+            children = [v.Select(
+                outlined = True,
+                hide_details = True,
+                label = "Select a reference file",
+                items = self.reference_file_list,
+            )]
         )
-        self.reference_file_selector_widget.layout = widgets.Layout(
-            width="80%",
-            height="auto",
-        )
+        # self.reference_file_selector_widget.layout = widgets.Layout(
+        #     width="80%",
+        #     height="auto",
+        # )
 
         def reference_file_setter(change):
 
@@ -110,49 +116,75 @@ class FASTOADInterface(widgets.VBox):
                 oad.DataFile(path_to_reference_file)
             )
 
-        self.reference_file_selector_widget.observe(
-            reference_file_setter, names="value"
+        self.reference_file_selector_widget.on_event("change", 
+            lambda widget, event, data :
+            reference_file_setter(data)
         )
 
-        self.reference_file_selector_box = widgets.VBox()
+        self.reference_file_selector_box = v.Row(
+            align = "top",
+            justify = "center",
+        )
         self.reference_file_selector_box.children = [
             self.reference_file_selector_widget
         ]
-        self.reference_file_selector_box.layout = widgets.Layout(
-            align_items="center", width="100%", height="4%"
-        )
+        # self.reference_file_selector_box.layout = widgets.Layout(
+        #     align_items="center", width="100%", height="4%"
+        # )
 
         self.start_button = get_start_button()
+        self.start_button.height = "54px"
 
         # Add a box for the start button
-        self.main_menu_box_start_button = widgets.Box(
-            children=[self.start_button],
-            layout=widgets.Layout(
-                display="flex",
-                flex_flow="column",
-                align_items="center",
-                width="100%",
-                height="12%",
-            ),
+        self.main_menu_box_start_button = v.Row(
+            class_ = "px-3 pt-3",
+            align = "top",
+            justify = "center",
+            children=[
+                self.reference_file_selector_widget,
+                v.Col(
+                    cols = 12,
+                    md = 2,
+                    children = [self.start_button],
+                )
+            ]
+            # layout=widgets.Layout(
+            #     display="flex",
+            #     flex_flow="column",
+            #     align_items="center",
+            #     width="100%",
+            #     height="12%",
+            # ),
         )
-        self.start_button.on_click(self.display_sensitivity_analysis_menu)
+        self.start_button.on_event("click", lambda widget, event, data : self.display_sensitivity_analysis_menu(event))
 
         fast_core_git_button = get_fast_oad_core_git_button()
         fast_cs25_git_button = get_fast_oad_cs25_git_button()
         fast_cs23_git_button = get_fast_oad_cs23_git_button()
 
         # Add a box for the GitHub links
-        self.main_menu_box_buttons_git = widgets.HBox(
-            children=[fast_core_git_button, fast_cs25_git_button, fast_cs23_git_button],
-            layout=widgets.Layout(
-                border="0px solid black",
-                margin="0 0 0 0px",
-                padding="0px",
-                justify_content="center",
-                align_items="center",
-                width="100%",
-                height="10%",
-            ),
+        self.main_menu_box_buttons_git = v.Row(
+            class_ = "my-3",
+            align = "top",
+            justify = "center",
+            children=[v.BtnToggle(
+                v_model = "toggle_none",
+                rounded = True,
+                children = [
+                    fast_core_git_button, 
+                    fast_cs25_git_button, 
+                    fast_cs23_git_button
+                ],
+            )]
+            # layout=widgets.Layout(
+            #     border="0px solid black",
+            #     margin="0 0 0 0px",
+            #     padding="0px",
+            #     justify_content="center",
+            #     align_items="center",
+            #     width="100%",
+            #     height="10%",
+            # ),
         )
 
         info_button = get_main_menu_info_button()
@@ -160,24 +192,33 @@ class FASTOADInterface(widgets.VBox):
         # Create a bottom layer for the main menu it will be consisting of box of size 40%/20%/40% which will allow
         # me to center the info button in the middle box AND justify the logo to the right. The same distribution
         # will be used everywhere
-        self.bottom_layer_info_box = widgets.widgets.Box(
-            children=[info_button],
-            layout=widgets.Layout(
-                border="0px solid black",
-                margin="0 0 0 0px",
-                padding="0px",
-                justify_content="center",
-                align_items="center",
-                width="20%",
-                height="100%",
-            ),
+        self.bottom_layer_info_box = v.Col(
+            cols = 12,
+            md = 2,
+            children = [v.Container(
+                class_ = "fill-height",
+                children = [v.Row(
+                    align = "center",
+                    justify = "center",
+                    children =  [info_button],
+                )]
+            )]
+            # layout=widgets.Layout(
+            #     border="0px solid black",
+            #     margin="0 0 0 0px",
+            #     padding="0px",
+            #     justify_content="center",
+            #     align_items="center",
+            #     width="20%",
+            #     height="100%",
+            # ),
         )
 
         isae_logo_file_path = pth.join(
             pth.dirname(__file__), "resources", "logo_supaero.png"
         )
         self.isae_logo_widget = _image_from_path(
-            isae_logo_file_path, height="100%", width="100"
+            isae_logo_file_path, height="10vh", width="100"
         )
 
         self.bottom_layer_logo_filler_box = widgets.Box(
@@ -187,7 +228,7 @@ class FASTOADInterface(widgets.VBox):
                 padding="0px",
                 justify_content="flex-start",
                 width="5%",
-                height="100%",
+                height="10%",
             ),
         )
 
@@ -195,26 +236,32 @@ class FASTOADInterface(widgets.VBox):
             pth.dirname(__file__), "resources", "logo_airbus.png"
         )
         self.airbus_logo_widget = _image_from_path(
-            airbus_logo_file_path, height="50%", width="100"
+            airbus_logo_file_path, height="5vh", width="100"
         )
 
         # The idea is to be able to have the logos in the same place and the buttons center. Thus, we will save the
         # logo box and the filler box to reuse them later
-        self.logo_box = widgets.HBox(
-            children=[
-                self.isae_logo_widget,
-                self.bottom_layer_logo_filler_box,
-                self.airbus_logo_widget,
-            ],
-            layout=widgets.Layout(
-                border="0px solid black",
-                margin="0 0 0 0px",
-                padding="0px",
-                justify_content="flex-end",
-                align_items="center",
-                width="40%",
-                height="100%",
-            ),
+        self.logo_box = v.Col(
+            cols = 12,
+            md = 5,
+            children=[v.Row(
+                align = "center",
+                justify = "center",
+                children = [
+                    self.isae_logo_widget,
+                    self.bottom_layer_logo_filler_box,
+                    self.airbus_logo_widget,
+                ]
+            )],
+            # layout=widgets.Layout(
+            #     border="0px solid black",
+            #     margin="0 0 0 0px",
+            #     padding="0px",
+            #     justify_content="flex-end",
+            #     align_items="center",
+            #     width="40%",
+            #     height="10%",
+            # ),
         )
 
         self.bottom_layer_filler_box = widgets.Box(
@@ -224,30 +271,39 @@ class FASTOADInterface(widgets.VBox):
                 padding="0px",
                 justify_content="flex-start",
                 width="40%",
-                height="100%",
+                height="10%",
             ),
         )
 
         # Add a box for the info button and the logos
-        self.main_menu_box_bottom_layer = widgets.Box(
+        self.main_menu_box_bottom_layer = v.Row(
+            align = "bottom",
             children=[
-                self.bottom_layer_filler_box,
+                # self.bottom_layer_filler_box,
+                v.Col(cols=12, md=5),
                 self.bottom_layer_info_box,
                 self.logo_box,
             ],
-            layout=BOTTOM_BOX_LAYOUT,
+            # layout=BOTTOM_BOX_LAYOUT,
         )
 
         # The default appearance of the box should be the main menu hence the following line
-        self.children = [
-            self.main_menu_filler_box,
-            self.fast_oad_main_menu_logo_widget,
-            self.reference_file_text_box,
-            self.reference_file_selector_box,
-            self.main_menu_box_start_button,
-            self.main_menu_box_buttons_git,
-            self.main_menu_box_bottom_layer,
-        ]
+        self.children = [v.Container(
+            fluid = True,
+            class_ = "fill-height pt-0",
+            children=[
+                # self.main_menu_filler_box,
+                self.fast_oad_main_menu_logo_widget,
+                # self.reference_file_text_box,
+                # self.reference_file_selector_box,
+                self.main_menu_box_start_button,
+                v.Row(children=[v.Divider(class_="pa-2")]),
+                self.main_menu_box_buttons_git,
+                self.main_menu_box_bottom_layer,
+            ]
+        )]
+
+#######################################################
 
         # Create a button to go back home
         self.analysis_back_home_button = get_back_home_button()
@@ -264,13 +320,31 @@ class FASTOADInterface(widgets.VBox):
         fast_oad_logo_top_layer_file_path = pth.join(
             pth.dirname(__file__), "resources", "logo_fast_oad_top_layer.jpg"
         )
-        self.fast_oad_top_layer_logo_widget = _image_from_path(
-            file_path=fast_oad_logo_top_layer_file_path,
-            height="12%",
-            width="100",
+        self.fast_oad_top_layer_logo_widget = v.Row(
+            align = "top",
+            justify = "center",
+            children = [_image_from_path(
+                file_path=fast_oad_logo_top_layer_file_path,
+                height="10vh",
+                width="100",
+            )]
         )
 
         self.sensitivity_analysis_tab = ParentTab()
+
+        # self.sensitivity_analysis_tab = v.Tabs(
+        #     fixed_tabs = True,
+        #     children = [
+        #         v.Tab(children=[name]) for name in TABS_NAME
+        #     ]
+        # )
+
+        # self.sensitivity_analysis_tab_items = v.TabsItems(
+        #     children = [
+        #         ParentTab()
+        #     ]
+        # )
+
         self.sensitivity_analysis_tab.layout = widgets.Layout(
             border="0px solid black",
             margin="0 0 0 0px",
@@ -282,53 +356,65 @@ class FASTOADInterface(widgets.VBox):
 
         # Create a header with an info button and a button to go back home. Put it at the bottom
         # to match what is done on the main menu
-        self.sensitivity_bottom_layer_button_box = v.Container(
+        self.sensitivity_bottom_layer_button_box = v.Col(
+            cols = 12, 
+            md = 2, 
             children=[
-                self.analysis_back_home_button,
-                self.analysis_info_button,
-                self.clear_all_button,
-            ],
-            layout=widgets.Layout(
-                border="0px solid black",
-                margin="0 0 0 0px",
-                padding="0px",
-                justify_content="center",
-                align_items="center",
-                width="20%",
-                height="100%",
-            ),
+                    self.analysis_back_home_button,
+                    self.analysis_info_button,
+                    self.clear_all_button,
+            ]
         )
+            # layout=widgets.Layout(
+            #     border="0px solid black",
+            #     margin="0 0 0 0px",
+            #     padding="0px",
+            #     justify_content="center",
+            #     align_items="center",
+            #     width="20%",
+            #     height="100%",
+            # ),
 
-        self.sensitivity_bottom_layer_box = widgets.Box(
+        self.sensitivity_bottom_layer_box = v.Row(
+            align = "bottom",
             children=[
-                self.bottom_layer_filler_box,
+                v.Col(cols=12, md=5),
                 self.sensitivity_bottom_layer_button_box,
                 self.logo_box,
             ],
-            layout=BOTTOM_BOX_LAYOUT,
+            # layout=BOTTOM_BOX_LAYOUT,
         )
 
     def display_main_menu(self, event):
 
-        self.children = [
-            self.main_menu_filler_box,
-            self.fast_oad_main_menu_logo_widget,
-            self.reference_file_text_box,
-            self.reference_file_selector_box,
-            self.main_menu_box_start_button,
-            self.main_menu_box_buttons_git,
-            self.main_menu_box_bottom_layer,
-        ]
+        self.children = [v.Container(
+            fluid = True,
+            class_ = "fill-height pt-0",
+            children=[
+                # self.main_menu_filler_box,
+                self.fast_oad_main_menu_logo_widget,
+                # self.reference_file_text_box,
+                # self.reference_file_selector_box,
+                self.main_menu_box_start_button,
+                v.Row(children=[v.Divider(class_="pa-2")]),
+                self.main_menu_box_buttons_git,
+                self.main_menu_box_bottom_layer,
+            ]
+        )]
 
     def display_sensitivity_analysis_menu(self, event):
 
         self.sensitivity_analysis_tab.selected_index = 0
 
-        self.children = [
-            self.fast_oad_top_layer_logo_widget,
-            self.sensitivity_analysis_tab,
-            self.sensitivity_bottom_layer_box,
-        ]
+        self.children = [v.Container(
+            fluid = True,
+            class_ = "fill-height pt-0",
+            children=[
+                self.fast_oad_top_layer_logo_widget,
+                self.sensitivity_analysis_tab,
+                self.sensitivity_bottom_layer_box,
+            ]
+        )]
 
     def clear_all_files(self, event):
 

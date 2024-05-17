@@ -3,6 +3,7 @@
 # Copyright (C) 2022 ISAE-SUPAERO
 
 import ipywidgets as widgets
+import ipyvuetify as v
 
 
 def get_start_button():
@@ -15,14 +16,14 @@ def get_start_button():
     )
 
     # Slight note, if you add two numbers after the hexadecimal code, you can make it transparent
-    start_button = widgets.Button(
-        description="Get started!",
-        layout=layout_button,
-        style=dict(
-            button_color="#33caff99",
-            font_weight="bold",
-            font_size="20px",
-        ),
+    start_button = v.Btn(
+        block = True,
+        color = "#33caff99",
+        children = ["Get started!"],
+        # layout=layout_button,
+        #     font_weight="bold",
+        #     font_size="20px",
+        # ),
     )
 
     return start_button
